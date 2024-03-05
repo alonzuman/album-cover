@@ -6,6 +6,7 @@ import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useFormStatus } from "react-dom";
+import { useRouter } from "next/navigation";
 
 export function Covers() {
   const [selected, setSelected] = React.useState<string[]>([]);
@@ -13,11 +14,13 @@ export function Covers() {
   const image1 = ALBUMS.find((album) => album.id === selected[0]);
   const image2 = ALBUMS.find((album) => album.id === selected[1]);
 
+  const { push } = useRouter();
+
   return (
     <form
       action={async (formData) => {
         const res = await generateCover(formData);
-        alert(JSON.stringify(res, null, 2));
+        push(`/cover/${res.id}`);
       }}
     >
       {image1 && <input type="hidden" name="image1" value={image1.url} />}
