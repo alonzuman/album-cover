@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { generateCover } from "./action";
+import { createCover } from "./action";
 import { ALBUMS } from "./data";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
@@ -21,7 +21,7 @@ export function Covers() {
   return (
     <form
       action={async (formData) => {
-        const res = await generateCover(formData);
+        const res = await createCover(formData);
         push(`/cover/${res.id}`);
       }}
     >

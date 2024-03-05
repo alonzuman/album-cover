@@ -22,7 +22,7 @@ export default function RootLayout({
         <header className="p-4">
           <h1 className="font-medium">Coverge</h1>
         </header>
-        {children}
+        <main className="max-w-2xl mx-auto p-4">{children}</main>
         <Toaster />
       </body>
     </html>
