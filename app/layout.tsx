@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import { Toaster } from "@/components/ui/toaster";
+
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -17,10 +19,11 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <header className='p-4'>
+        <header className="p-4">
           <h1 className="font-medium">Coverge</h1>
         </header>
         {children}
+        <Toaster />
       </body>
     </html>
   );

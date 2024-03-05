@@ -7,9 +7,11 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/use-toast";
 
 export function Covers() {
   const [selected, setSelected] = React.useState<string[]>([]);
+  const { toast } = useToast();
 
   const image1 = ALBUMS.find((album) => album.id === selected[0]);
   const image2 = ALBUMS.find((album) => album.id === selected[1]);
@@ -36,7 +38,14 @@ export function Covers() {
                 setSelected((prev) => {
                   const selectedMoreThanTwo = prev.length > 1;
 
-                  if (!isSelected && selectedMoreThanTwo) return prev;
+                  if (!isSelected && selectedMoreThanTwo) {
+                    toast({
+                      title: "Maximum selection reached",
+                      description: "You can only select two images.",
+                      variant: "destructive",
+                    });
+                    return prev;
+                  }
                   if (isSelected) return prev.filter((id) => id !== album.id);
                   return [...prev, album.id];
                 });
