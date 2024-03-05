@@ -52,20 +52,18 @@ const imageGenerationOutputSchema = z.object({
 export async function createImageGeneration(
   args: z.infer<typeof imageGenerationInputSchema>
 ) {
-  // const { image1, image2 } = imageGenerationInputSchema.parse(args);
+  const { image1, image2, prompt } = imageGenerationInputSchema.parse(args);
 
-  // console.log(`Creating generation with ${image1} and ${image2}`);
+  console.log(`Creating generation with ${image1} and ${image2} and ${prompt}`);
 
   const res = await replicate.predictions.create({
     input: {
       steps: 20,
       width: 1024,
       height: 1024,
-      prompt: "a bright abstract painting of a cyborg",
-      image_1:
-        "https://replicate.delivery/pbxt/KRyveMWjBWpI9NR6GuK1B1GoJMUhlvfUEa0yq6RWBqz3HaP5/ComfyUI_00319_.png",
-      image_2:
-        "https://replicate.delivery/pbxt/KRyveLQ82s8OdaAqUNIV5kbH3dPIdrGTqO9ka1IK5TecpWz0/output-0.png",
+      prompt: prompt,
+      image_1: image1,
+      image_2: image2,
       base_model: "albedobaseXL_v13.safetensors",
       batch_size: 1,
       merge_strength: 0.75,

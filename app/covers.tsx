@@ -1,7 +1,6 @@
 "use client";
 import React from "react";
-import { createCover } from "./action";
-import { ALBUMS } from "./data";
+import { ListCovers, createCover, listCovers } from "./action";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -9,12 +8,13 @@ import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 
-export function Covers() {
+export function Covers(props: { data: ListCovers }) {
   const [selected, setSelected] = React.useState<string[]>([]);
   const { toast } = useToast();
+  const covers = props.data;
 
-  const image1 = ALBUMS.find((album) => album.id === selected[0]);
-  const image2 = ALBUMS.find((album) => album.id === selected[1]);
+  const image1 = covers.find((album) => album.id === selected[0]);
+  const image2 = covers.find((album) => album.id === selected[1]);
 
   const { push } = useRouter();
 
@@ -28,7 +28,7 @@ export function Covers() {
       {image1 && <input type="hidden" name="image1" value={image1.url} />}
       {image2 && <input type="hidden" name="image2" value={image2.url} />}
       <div className="grid grid-cols-2 gap-2">
-        {ALBUMS.map((album) => {
+        {covers.map((album) => {
           const isSelected = selected.includes(album.id);
 
           return (
@@ -50,7 +50,7 @@ export function Covers() {
                   return [...prev, album.id];
                 });
               }}
-              key={album.name}
+              key={album.id}
               className={cn(
                 "transition-all duration-100 h-full w-full flex items-center justify-center",
                 isSelected ? "scale-95" : "scale-100"
@@ -60,7 +60,7 @@ export function Covers() {
                 height={512}
                 width={512}
                 src={album.url}
-                alt={`${album.name} by ${album.artist}`}
+                alt={album.id}
                 className="object-cover h-full w-full rounded-md"
               />
             </button>
@@ -80,7 +80,7 @@ export function Covers() {
               height={48}
               width={48}
               src={image1.url}
-              alt={`${image1.name} by ${image1.artist}`}
+              alt={image1.id}
             />
           )}
           {image1 && image2 && (
@@ -94,7 +94,7 @@ export function Covers() {
               height={48}
               width={48}
               src={image2.url}
-              alt={`${image2.name} by ${image2.artist}`}
+              alt={image2.id}
             />
           )}
         </div>
