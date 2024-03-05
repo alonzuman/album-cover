@@ -16,7 +16,12 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <header className='p-4'>
+          <h1 className="font-medium">Coverge</h1>
+        </header>
+        {children}
+      </body>
     </html>
   );
 }
