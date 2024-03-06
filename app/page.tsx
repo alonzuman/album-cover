@@ -1,6 +1,6 @@
 import React, { Suspense } from "react";
 import { Covers } from "./covers";
-import { listCovers, seed } from "./action";
+import { listCovers, seed } from "./actions";
 import { Button } from "@/components/ui/button";
 
 export default async function Page() {

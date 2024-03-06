@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import { ListCovers, createCover, listCovers } from "./action";
+import { ListCovers, createCover, listCovers } from "./actions";
 import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";

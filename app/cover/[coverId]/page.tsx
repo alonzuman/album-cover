@@ -1,4 +1,4 @@
-import { getCover } from "@/app/action";
+import { getCover } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { revalidatePath } from "next/cache";
 import Image from "next/image";
