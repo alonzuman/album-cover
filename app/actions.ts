@@ -1,12 +1,12 @@
 "use server";
 import { db } from "@/lib/db";
 import {
-  captionImage,
+  createImageCaption,
   createImageGeneration,
   getImageGeneration,
 } from "@/lib/replicate";
 import { put } from "@vercel/blob";
-import { createBlobUrl, getId } from "@/lib/utils";
+import { createBlobUrl } from "@/lib/utils";
 
 const coverInclude = {
   parentCovers: true,
@@ -109,10 +109,9 @@ export async function getCover(id: string) {
     });
   }
 
-  // TODO handle error cases
+  // TODO handle error cases better
   if (generation.status === "failed" || generation.status === "error") {
-    console.log(generation.error);
-
+    console.error(generation.error);
     cover = await db.cover.update({
       where: {
         id,
@@ -131,18 +130,19 @@ export async function getCover(id: string) {
 async function generatePrompt(args: { image1: string; image2: string }) {
   console.log("[generatePrompt]", args);
   const [image1Caption, image2Caption] = await Promise.all([
-    captionImage({ image: args.image1 }),
-    captionImage({ image: args.image2 }),
+    createImageCaption({ image: args.image1 }),
+    createImageCaption({ image: args.image2 }),
   ]);
 
   return `An album cover of a mix between ${image1Caption.caption} and a ${image2Caption.caption}`;
 }
 
 export async function listCovers() {
+  console.log("[listCovers]");
   const covers = await db.cover.findMany({
     where: {
       status: {
-        in: ["succeeded", "published"],
+        in: ["published"],
       },
     },
   });

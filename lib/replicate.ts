@@ -52,7 +52,7 @@ const imageGenerationOutputSchema = z.object({
 export async function createImageGeneration(
   args: z.infer<typeof imageGenerationInputSchema>
 ) {
-  console.log("[createImageGeneration]", args);
+  // console.log("[createImageGeneration]", args);
   const { image1, image2, prompt } = imageGenerationInputSchema.parse(args);
 
   const res = await replicate.predictions.create({
@@ -77,21 +77,21 @@ export async function createImageGeneration(
 }
 
 export async function getImageGeneration(id: string) {
-  console.log("[getImageGeneration]", id);
+  // console.log("[getImageGeneration]", id);
   const res = await replicate.predictions.get(id);
   return imageGenerationOutputSchema.parse(res);
 }
 
-const captionImageInputSchema = z.object({
+const createImageCaptionInputSchema = z.object({
   image: z.string().url(),
 });
 
-const captionImageReplicateOutputSchema = z.string();
+const createImageCaptionReplicateOutputSchema = z.string();
 
-export async function captionImage(
-  args: z.infer<typeof captionImageInputSchema>
+export async function createImageCaption(
+  args: z.infer<typeof createImageCaptionInputSchema>
 ) {
-  console.log("[captionImage]", args);
+  // console.log("[createImageCaption]", args);
   const output = await replicate.run(
     "salesforce/blip:2e1dddc8621f72155f24cf2e0adbde548458d3cab9f00c0139eea840d0ac4746",
     {
@@ -102,7 +102,7 @@ export async function captionImage(
     }
   );
 
-  const parsedOutput = captionImageReplicateOutputSchema.parse(output);
+  const parsedOutput = createImageCaptionReplicateOutputSchema.parse(output);
 
   return {
     caption: parsedOutput?.replace("Caption: ", ""),
