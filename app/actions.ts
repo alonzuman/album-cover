@@ -1,10 +1,16 @@
 "use server";
 import { db } from "@/lib/db";
-import { createImageGeneration, getImageGeneration } from "@/lib/replicate";
-import { ALBUMS } from "./data";
-import { put, del, list } from "@vercel/blob";
-import fs from "fs";
-import { getId } from "@/lib/utils";
+import {
+  captionImage,
+  createImageGeneration,
+  getImageGeneration,
+} from "@/lib/replicate";
+import { put } from "@vercel/blob";
+import { createBlobUrl, getId } from "@/lib/utils";
+
+const coverInclude = {
+  parentCovers: true,
+};
 
 export async function createCover(formData: FormData) {
   console.log("[createCover]");
@@ -21,10 +27,11 @@ export async function createCover(formData: FormData) {
 
   if (!image1Url || !image2Url) throw new Error("Missing image");
 
-  // TODO Create the prompt by mixing the descriptions of both images
-  const image1Description = "a bright abstract painting";
-  const image2Description = "a cyborg";
-  const generatedPrompt = `An album cover of a ${image1Description} and a ${image2Description}`;
+  // Create the prompt by mixing the descriptions of both images
+  const generatedPrompt = await generatePrompt({
+    image1: image1Url,
+    image2: image2Url,
+  });
 
   // Run the model with both images
   const generation = await createImageGeneration({
@@ -61,9 +68,7 @@ export async function getCover(id: string) {
     where: {
       id,
     },
-    include: {
-      parentCovers: true,
-    },
+    include: coverInclude,
   });
 
   if (cover?.status === "succeeded" || cover?.status === "published") {
@@ -100,9 +105,7 @@ export async function getCover(id: string) {
         url: blobRes.url,
         status: "succeeded",
       },
-      include: {
-        parentCovers: true,
-      },
+      include: coverInclude,
     });
   }
 
@@ -117,14 +120,22 @@ export async function getCover(id: string) {
       data: {
         status: "error",
       },
-      include: {
-        parentCovers: true,
-      },
+      include: coverInclude,
     });
   }
 
   // Return the generation
   return cover;
+}
+
+async function generatePrompt(args: { image1: string; image2: string }) {
+  console.log("[generatePrompt]", args);
+  const [image1Caption, image2Caption] = await Promise.all([
+    captionImage({ image: args.image1 }),
+    captionImage({ image: args.image2 }),
+  ]);
+
+  return `An album cover of a mix between ${image1Caption.caption} and a ${image2Caption.caption}`;
 }
 
 export async function listCovers() {
@@ -139,49 +150,3 @@ export async function listCovers() {
 }
 
 export type ListCovers = Awaited<ReturnType<typeof listCovers>>;
-
-export async function seed() {
-  console.log("[seed]", "🌱");
-
-  // Delete covers
-  console.log("Deleting covers...");
-  await db.cover.deleteMany({});
-  console.log("Deleted covers");
-
-  console.log("Deleting blobs...");
-  const res = await list();
-  await Promise.all(
-    res.blobs.map(async (blob) => {
-      await del(blob.url);
-    })
-  );
-  console.log("Deleted blobs");
-
-  const seedPromises = ALBUMS.map(async (album) => {
-    console.log("Seeding album", album.id);
-    const albumUrlPath = process.cwd() + "/public" + album.url;
-    const buffer = fs.readFileSync(albumUrlPath);
-
-    const blobUrl = createBlobUrl({ folder: "covers", id: album.id });
-
-    const putRes = await put(blobUrl, buffer, {
-      contentType: "image/webp",
-      access: "public",
-    });
-
-    await db.cover.create({
-      data: {
-        id: album.id,
-        url: putRes.url,
-      },
-    });
-  });
-
-  await Promise.all(seedPromises);
-}
-
-function createBlobUrl(args: { folder: string; id: string }) {
-  const path = args.id || getId();
-
-  return `covers/${path}`;
-}

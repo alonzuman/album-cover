@@ -82,17 +82,29 @@ export async function getImageGeneration(id: string) {
   return imageGenerationOutputSchema.parse(res);
 }
 
-export async function captionImage(imageUrl: string) {
+const captionImageInputSchema = z.object({
+  image: z.string().url(),
+});
+
+const captionImageReplicateOutputSchema = z.string();
+
+export async function captionImage(
+  args: z.infer<typeof captionImageInputSchema>
+) {
+  console.log("[captionImage]", args);
   const output = await replicate.run(
     "salesforce/blip:2e1dddc8621f72155f24cf2e0adbde548458d3cab9f00c0139eea840d0ac4746",
     {
       input: {
         task: "image_captioning",
-        image:
-          "https://replicate.delivery/mgxm/f4e50a7b-e8ca-432f-8e68-082034ebcc70/demo.jpg",
+        image: args.image
       },
     }
   );
 
-  console.log(output);
+  const parsedOutput = captionImageReplicateOutputSchema.parse(output);
+
+  return {
+    caption: parsedOutput?.replace("Caption: ", ""),
+  };
 }

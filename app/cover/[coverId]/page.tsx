@@ -19,7 +19,6 @@ export default async function Page(props: {
 }
 
 async function Cover(props: { coverId: string }) {
-  // TODO replace it with fetch from my DB
   let cover = await getCover(props.coverId);
 
   // Have a counter for safety
@@ -42,8 +41,9 @@ async function Cover(props: { coverId: string }) {
     return (
       <div>
         <h1>Timeout</h1>
-        <p>It took too long to process the cover</p>
-        <Button>Try Again</Button>
+        <p>
+          It took too long to generate the cover art, try refreshing the page
+        </p>
       </div>
     );
   }
@@ -51,7 +51,7 @@ async function Cover(props: { coverId: string }) {
   return (
     <div>
       {cover?.url && (
-        <Image src={cover?.url} width={1024} height={1024} alt={cover?.id} />
+        <Image className='rounded-md' src={cover?.url} width={1024} height={1024} alt={cover?.id} />
       )}
       <pre>{JSON.stringify(cover, null, 2)}</pre>
     </div>

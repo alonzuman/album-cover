@@ -9,3 +9,10 @@ export function cn(...inputs: ClassValue[]) {
 export function getId() {
   return nanoid();
 }
+
+
+export function createBlobUrl(args: { folder: string; id: string }) {
+  const path = args.id || getId();
+
+  return `covers/${path}`;
+}
