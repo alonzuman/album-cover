@@ -4,6 +4,8 @@ import { Cover } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { Suspense } from "react";
 
+export const dynamic = "force-dynamic";
+
 export default async function Page() {
   return (
     <>
