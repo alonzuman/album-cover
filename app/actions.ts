@@ -7,6 +7,7 @@ import {
 } from "@/lib/replicate";
 import { put } from "@vercel/blob";
 import { createBlobUrl } from "@/lib/utils";
+import { Cover } from "@prisma/client";
 
 const coverInclude = {
   parentCovers: true,
@@ -128,18 +129,15 @@ export async function getCover(id: string) {
   return cover;
 }
 
-async function generatePrompt(args: {
-  cover1: { prompt: string; url: string };
-  cover2: { prompt: string; url: string };
-}) {
+async function generatePrompt(args: { cover1: Cover; cover2: Cover }) {
   console.log("[generatePrompt]", args, Date.now());
   const [image1Caption, image2Caption] = await Promise.all([
     args.cover1.prompt
       ? { caption: args.cover1.prompt }
-      : createImageCaption({ image: args.cover1.url }),
+      : createImageCaption({ image: args.cover1.url as string }),
     args.cover2.prompt
       ? { caption: args.cover2.prompt }
-      : createImageCaption({ image: args.cover1.url }),
+      : createImageCaption({ image: args.cover1.url as string }),
   ]);
 
   return `An album cover of a mix between ${image1Caption.caption} and a ${image2Caption.caption}`;

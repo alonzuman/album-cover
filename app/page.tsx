@@ -1,20 +1,12 @@
-import React, { Suspense } from "react";
-import { CoversList } from "./covers";
-import { listCovers } from "./actions";
+import React from "react";
+import { Explore } from "./explore";
 // import { Seed } from "./seed/client";
 
-export default async function Page() {
+export default function Page() {
   return (
     <>
       {/* <Seed /> */}
-      <Suspense fallback="Loading...">
-        <Covers />
-      </Suspense>
+      <Explore />
     </>
   );
-}
-
-async function Covers() {
-  const covers = await listCovers();
-  return <CoversList data={covers} />;
 }
