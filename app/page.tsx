@@ -7,7 +7,6 @@ export default async function Page() {
   return (
     <>
       {/* <Seed /> */}
-      <h1 className="text-xl font-medium mb-2">Latest</h1>
       <Suspense fallback="Loading...">
         <Covers />
       </Suspense>
