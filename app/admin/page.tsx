@@ -23,6 +23,10 @@ async function NewCoversList() {
       // Get all succeeded generation that aren't approved
       status: "succeeded",
     },
+    orderBy: {
+      // Oldest first
+      createdAt: "asc",
+    },
   });
 
   return (

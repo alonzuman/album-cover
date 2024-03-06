@@ -7,8 +7,11 @@ import { Button } from "@/components/ui/button";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
+import Link from "next/link";
+import { useSelect } from "./select-provider";
 
 export function CoversList(props: { data: ListCovers }) {
+  const { selecting, toggleSelect } = useSelect();
   const [selected, setSelected] = React.useState<string[]>([]);
   const { toast } = useToast();
   const covers = props.data;
@@ -22,6 +25,7 @@ export function CoversList(props: { data: ListCovers }) {
     <form
       action={async (formData) => {
         const res = await createCover(formData);
+        toggleSelect();
         push(`/cover/${res.id}`);
       }}
     >
@@ -31,7 +35,7 @@ export function CoversList(props: { data: ListCovers }) {
         {covers.map((album) => {
           const isSelected = selected.includes(album.id);
 
-          return (
+          return selecting ? (
             <button
               type="button"
               onClick={() => {
@@ -52,10 +56,28 @@ export function CoversList(props: { data: ListCovers }) {
               }}
               key={album.id}
               className={cn(
-                "transition-all duration-100 h-full w-full flex items-center justify-center",
-                isSelected ? "scale-95" : "scale-100"
+                "transition-all border border-transparent duration-100 h-full w-full flex items-center justify-center rounded-lg",
+                isSelected
+                  ? "bg-blue-400/50 border-blue-400"
+                  : "bg-transparent",
+                selecting && !isSelected && "animate-dance"
               )}
             >
+              {album.url && (
+                <Image
+                  height={512}
+                  width={512}
+                  src={album.url}
+                  alt={album.id}
+                  className={cn(
+                    "object-cover h-full w-full rounded-md transition-all duration-100",
+                    isSelected ? "scale-75" : "scale-100"
+                  )}
+                />
+              )}
+            </button>
+          ) : (
+            <Link href={`/cover/${album.id}`}>
               {album.url && (
                 <Image
                   height={512}
@@ -65,13 +87,13 @@ export function CoversList(props: { data: ListCovers }) {
                   className="object-cover h-full w-full rounded-md"
                 />
               )}
-            </button>
+            </Link>
           );
         })}
       </div>
       <footer
         className={cn(
-          selected?.length > 0 ? "translate-y-0" : "translate-y-44",
+          selecting ? "translate-y-0" : "translate-y-44",
           "transition-all duration-100 flex justify-between fixed left-[50%] p-4 -translate-x-[50%] bottom-4 max-w-md mx-auto w-full z-10 bg-background border-border rounded-md"
         )}
       >
@@ -85,11 +107,17 @@ export function CoversList(props: { data: ListCovers }) {
               alt={cover1.id}
             />
           )}
-          {cover1 && cover2 && (
-            <span className="flex flex-col items-center h-full w-full justify-center px-4 text-xl">
-              +
-            </span>
-          )}
+
+          <div className="flex flex-col items-center h-full w-full justify-center px-4">
+            {cover1 || cover2 ? (
+              <span className="text-xl">+</span>
+            ) : (
+              <span className="text-xs">
+                Select two album covers to mix together
+              </span>
+            )}
+          </div>
+
           {cover2?.url && (
             <Image
               className="rounded object-cover h-12 w-12"
@@ -110,7 +138,7 @@ function SubmitButton() {
   const { pending } = useFormStatus();
 
   return (
-    <Button size="lg" type="submit">
+    <Button disabled={pending} size="lg" type="submit">
       {pending ? "Generating..." : "Generate"}
     </Button>
   );

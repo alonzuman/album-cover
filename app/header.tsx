@@ -2,12 +2,15 @@
 import { BlendIcon } from "lucide-react";
 import Link from "next/link";
 import React, { Suspense } from "react";
-import { Selector } from "./selector";
+import { useSelect } from "./select-provider";
+import { Button } from "@/components/ui/button";
 
 export function Header() {
+  const { selecting, toggleSelect } = useSelect();
+
   return (
-    <Suspense>
-      <header className="p-4 flex items-center gap-4 justify-between">
+    <>
+      <header className="p-4 flex items-center gap-4 justify-between sticky top-0 bg-background z-10">
         <Link className="flex gap-1" href="/">
           <BlendIcon size={24} />
           <h1 className="font-medium mb-2">Coverge</h1>
@@ -16,8 +19,10 @@ export function Header() {
         {/* <Link href="/">
             <h1 className="text-xl font-medium mb-2">Explore</h1>
           </Link> */}
-        <Selector />
+        <Button size="lg" variant="outline" onClick={toggleSelect}>
+          {selecting ? "Cancel" : "Select"}
+        </Button>
       </header>
-    </Suspense>
+    </>
   );
 }

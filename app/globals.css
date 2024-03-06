@@ -74,3 +74,20 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Make it dance similarly to the iOS app icons */
+.animate-dance {
+  animation: dance 0.2s infinite;
+}
+
+@keyframes dance {
+  0% {
+    transform: rotate(-1deg);
+  }
+  50% {
+    transform: rotate(1deg);
+  }
+  100% {
+    transform: rotate(-1deg);
+  }
+}
