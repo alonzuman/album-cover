@@ -1,14 +1,16 @@
-/*
-  Warnings:
+-- CreateEnum
+CREATE TYPE "CoverStatus" AS ENUM ('published', 'succeeded', 'processing', 'error', 'deleted');
 
-  - You are about to drop the `ParentCover` table. If the table is not empty, all the data it contains will be lost.
+-- CreateTable
+CREATE TABLE "Cover" (
+    "id" TEXT NOT NULL,
+    "url" TEXT,
+    "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updatedAt" TIMESTAMP(3) NOT NULL,
+    "status" "CoverStatus" NOT NULL DEFAULT 'published',
 
-*/
--- DropForeignKey
-ALTER TABLE "ParentCover" DROP CONSTRAINT "ParentCover_coverId_fkey";
-
--- DropTable
-DROP TABLE "ParentCover";
+    CONSTRAINT "Cover_pkey" PRIMARY KEY ("id")
+);
 
 -- CreateTable
 CREATE TABLE "_CoverToCover" (

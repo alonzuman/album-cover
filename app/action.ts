@@ -73,7 +73,6 @@ export async function getCover(id: string) {
   // Get the generation from the db
   const generation = await getImageGeneration(id);
 
-  console.log(generation.status);
   if (generation.status === "succeeded") {
     // Get the first response
     const imageResponse = generation?.output?.[0];
