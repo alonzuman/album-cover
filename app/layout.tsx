@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 
 import "./globals.css";
 import Link from "next/link";
-import { Selector } from "./selector";
+import { Selector } from "../components/selector";
 import { BlendIcon } from "lucide-react";
 
 const inter = Inter({ subsets: ["latin"] });
