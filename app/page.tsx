@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 export default async function Page() {
   return (
     <>
+      <SeedButton />
       <h2 className="font-medium mb-2">Latest</h2>
       <Suspense fallback="Loading...">
         <CoversList />

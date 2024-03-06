@@ -25,8 +25,8 @@ export function Covers(props: { data: ListCovers }) {
         push(`/cover/${res.id}`);
       }}
     >
-      {image1 && <input type="hidden" name="image1" value={image1.url} />}
-      {image2 && <input type="hidden" name="image2" value={image2.url} />}
+      {image1?.url && <input type="hidden" name="image1" value={image1?.url} />}
+      {image2?.url && <input type="hidden" name="image2" value={image2?.url} />}
       <div className="grid grid-cols-2 gap-2">
         {covers.map((album) => {
           const isSelected = selected.includes(album.id);

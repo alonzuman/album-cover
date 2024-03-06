@@ -37,7 +37,7 @@ const imageGenerationOutputSchema = z.object({
     })
     .optional(),
   logs: z.string().optional(),
-  error: z.null().optional(),
+  error: z.string().nullish().optional(),
   status: z.string().optional(),
   created_at: z.string().optional(),
   output: z.string().array().optional(),

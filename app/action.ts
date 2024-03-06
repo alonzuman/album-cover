@@ -1,21 +1,17 @@
 "use server";
 import { db } from "@/lib/db";
 import { createImageGeneration, getImageGeneration } from "@/lib/replicate";
-import { getId } from "@/lib/utils";
 import { ALBUMS } from "./data";
-import { put } from "@vercel/blob";
+import { put, del, list } from "@vercel/blob";
 import fs from "fs";
+import { getId } from "@/lib/utils";
 
 export async function createCover(formData: FormData) {
   console.log("[createCover]");
-  const image1 = formData.get("image1") as File;
-  const image2 = formData.get("image2") as File;
+  const image1Url = formData.get("image1") as string;
+  const image2Url = formData.get("image2") as string;
 
-  const [image1Url, image2Url] = await Promise.all([
-    put(getId() + ".png", image1, { access: "public" }),
-    put(getId() + ".png", image2, { access: "public" }),
-  ]);
-  
+  if (!image1Url || !image2Url) throw new Error("Missing image");
 
   // TODO Create the prompt by mixing the descriptions of both images
   const image1Description = "a bright abstract painting";
@@ -25,11 +21,9 @@ export async function createCover(formData: FormData) {
   // Run the model with both images
   const generation = await createImageGeneration({
     prompt: generatedPrompt,
-    image1: image1Url.url,
-    image2: image2Url.url,
+    image1: image1Url,
+    image2: image2Url,
   });
-
-  // Put the result in the object store
 
   // Put the result meta in the db
   const cover = await db.cover.create({
@@ -56,21 +50,22 @@ export async function getCover(id: string) {
   // Get the generation from the db
   const generation = await getImageGeneration(id);
 
-  if (generation.status === "succeeded" && !cover?.url) {
-    console.log("UPDATING");
+  console.log(generation.status);
+  if (generation.status === "succeeded") {
     // Get the first response
     const imageResponse = generation?.output?.[0];
 
     if (!imageResponse) throw new Error("No image response");
 
     // Fetch it and turn it into a buffer
-    const blob = await fetch(imageResponse).then((res) => res.blob());
-
-    // Get the file extension
-    const fileExtension = imageResponse.split(".").pop();
+    const blob = await fetch(imageResponse, {
+      cache: "no-store",
+    }).then((res) => res.blob());
 
     // Upload the image to the object store
-    const blobRes = await put(id + fileExtension, blob, {
+    const blobUrl = createBlobUrl({ folder: "covers", id });
+    const blobRes = await put(blobUrl, blob, {
+      contentType: "image/jpeg",
       access: "public",
     });
 
@@ -88,6 +83,8 @@ export async function getCover(id: string) {
 
   // TODO handle error cases
   if (generation.status === "failed" || generation.status === "error") {
+    console.log(generation.error);
+
     cover = await db.cover.update({
       where: {
         id,
@@ -103,13 +100,35 @@ export async function getCover(id: string) {
 }
 
 export async function listCovers() {
-  const covers = await db.cover.findMany();
+  const covers = await db.cover.findMany({
+    where: {
+      status: {
+        in: ["succeeded", "published"],
+      },
+    },
+  });
   return covers;
 }
 
 export type ListCovers = Awaited<ReturnType<typeof listCovers>>;
 
 export async function seed() {
+  console.log("[seed]", "🌱");
+
+  // Delete covers
+  console.log("Deleting covers...");
+  await db.cover.deleteMany({});
+  console.log("Deleted covers");
+
+  console.log("Deleting blobs...");
+  const res = await list();
+  await Promise.all(
+    res.blobs.map(async (blob) => {
+      await del(blob.url);
+    })
+  );
+  console.log("Deleted blobs");
+
   for (let i = 0; i < ALBUMS.length; i++) {
     console.log("Seeding album", i);
     const album = ALBUMS[i];
@@ -119,18 +138,24 @@ export async function seed() {
     const buffer = fs.readFileSync(albumUrlPath);
 
     // Put it in the object store
-    const fileName = album.url.split("/").pop();
-    const fileExtension = fileName?.split(".").pop();
+    const blobUrl = createBlobUrl({ folder: "covers", id: album.id });
 
-    const res = await put(album.id + fileExtension, buffer, {
+    const putRes = await put(blobUrl, buffer, {
+      contentType: "image/jpeg",
       access: "public",
     });
 
     await db.cover.create({
       data: {
         id: album.id,
-        url: res.url,
+        url: putRes.url,
       },
     });
   }
+}
+
+function createBlobUrl(args: { folder: string; id: string }) {
+  const path = args.id || getId();
+
+  return `covers/${path}`;
 }
