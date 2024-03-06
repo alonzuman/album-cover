@@ -8,8 +8,16 @@ import { getId } from "@/lib/utils";
 
 export async function createCover(formData: FormData) {
   console.log("[createCover]");
-  const image1Url = formData.get("image1") as string;
-  const image2Url = formData.get("image2") as string;
+  const cover1Id = formData.get("cover1") as string;
+  const cover2Id = formData.get("cover2") as string;
+
+  const [cover1, cover2] = await Promise.all([
+    await getCover(cover1Id),
+    await getCover(cover2Id),
+  ]);
+
+  const image1Url = cover1?.url;
+  const image2Url = cover2?.url;
 
   if (!image1Url || !image2Url) throw new Error("Missing image");
 
@@ -30,6 +38,16 @@ export async function createCover(formData: FormData) {
     data: {
       id: generation.id,
       status: "processing",
+      parentCovers: {
+        connect: [
+          {
+            id: cover1Id,
+          },
+          {
+            id: cover2Id,
+          },
+        ],
+      },
     },
   });
 
@@ -43,9 +61,14 @@ export async function getCover(id: string) {
     where: {
       id,
     },
+    include: {
+      parentCovers: true,
+    },
   });
 
-  if (cover?.status === "succeeded") return cover;
+  if (cover?.status === "succeeded" || cover?.status === "published") {
+    return cover;
+  }
 
   // Get the generation from the db
   const generation = await getImageGeneration(id);
@@ -78,6 +101,9 @@ export async function getCover(id: string) {
         url: blobRes.url,
         status: "succeeded",
       },
+      include: {
+        parentCovers: true,
+      },
     });
   }
 
@@ -91,6 +117,9 @@ export async function getCover(id: string) {
       },
       data: {
         status: "error",
+      },
+      include: {
+        parentCovers: true,
       },
     });
   }
@@ -129,19 +158,15 @@ export async function seed() {
   );
   console.log("Deleted blobs");
 
-  for (let i = 0; i < ALBUMS.length; i++) {
-    console.log("Seeding album", i);
-    const album = ALBUMS[i];
-    // Transform the image to a blobg
-
+  const seedPromises = ALBUMS.map(async (album) => {
+    console.log("Seeding album", album.id);
     const albumUrlPath = process.cwd() + "/public" + album.url;
     const buffer = fs.readFileSync(albumUrlPath);
 
-    // Put it in the object store
     const blobUrl = createBlobUrl({ folder: "covers", id: album.id });
 
     const putRes = await put(blobUrl, buffer, {
-      contentType: "image/jpeg",
+      contentType: "image/webp",
       access: "public",
     });
 
@@ -151,7 +176,9 @@ export async function seed() {
         url: putRes.url,
       },
     });
-  }
+  });
+
+  await Promise.all(seedPromises);
 }
 
 function createBlobUrl(args: { folder: string; id: string }) {

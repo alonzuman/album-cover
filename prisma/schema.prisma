@@ -12,12 +12,15 @@ datasource db {
 }
 
 model Cover {
-  id           String        @id @default(cuid())
-  url          String?        @db.Text
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  parentCovers ParentCover[]
-  status       CoverStatus   @default(published)
+  id        String      @id @default(cuid())
+  url       String?     @db.Text
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  status    CoverStatus @default(published)
+
+  // Self relations to parent/child covers
+  parentCovers Cover[] @relation("CoverToCover")
+  childCovers  Cover[] @relation("CoverToCover")
 }
 
 enum CoverStatus {
@@ -26,12 +29,4 @@ enum CoverStatus {
   processing
   error
   deleted
-}
-
-model ParentCover {
-  id        String   @id @default(cuid())
-  cover     Cover    @relation(fields: [coverId], references: [id])
-  coverId   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
 }

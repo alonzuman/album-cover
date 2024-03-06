@@ -52,9 +52,8 @@ const imageGenerationOutputSchema = z.object({
 export async function createImageGeneration(
   args: z.infer<typeof imageGenerationInputSchema>
 ) {
+  console.log("[createImageGeneration]", args);
   const { image1, image2, prompt } = imageGenerationInputSchema.parse(args);
-
-  console.log(`Creating generation with ${image1} and ${image2} and ${prompt}`);
 
   const res = await replicate.predictions.create({
     input: {
@@ -78,7 +77,7 @@ export async function createImageGeneration(
 }
 
 export async function getImageGeneration(id: string) {
+  console.log("[getImageGeneration]", id);
   const res = await replicate.predictions.get(id);
-
   return imageGenerationOutputSchema.parse(res);
 }

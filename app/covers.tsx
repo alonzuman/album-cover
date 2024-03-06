@@ -13,8 +13,8 @@ export function Covers(props: { data: ListCovers }) {
   const { toast } = useToast();
   const covers = props.data;
 
-  const image1 = covers.find((album) => album.id === selected[0]);
-  const image2 = covers.find((album) => album.id === selected[1]);
+  const cover1 = covers.find((album) => album.id === selected[0]);
+  const cover2 = covers.find((album) => album.id === selected[1]);
 
   const { push } = useRouter();
 
@@ -25,8 +25,8 @@ export function Covers(props: { data: ListCovers }) {
         push(`/cover/${res.id}`);
       }}
     >
-      {image1?.url && <input type="hidden" name="image1" value={image1?.url} />}
-      {image2?.url && <input type="hidden" name="image2" value={image2?.url} />}
+      {cover1 && <input type="hidden" name="cover1" value={cover1.id} />}
+      {cover2 && <input type="hidden" name="cover2" value={cover2.id} />}
       <div className="grid grid-cols-2 gap-2">
         {covers.map((album) => {
           const isSelected = selected.includes(album.id);
@@ -74,27 +74,27 @@ export function Covers(props: { data: ListCovers }) {
         )}
       >
         <div className="flex gap-2">
-          {image1 && (
+          {cover1 && (
             <Image
               className="rounded object-cover h-12 w-12"
               height={48}
               width={48}
-              src={image1.url}
-              alt={image1.id}
+              src={cover1.url}
+              alt={cover1.id}
             />
           )}
-          {image1 && image2 && (
+          {cover1 && cover2 && (
             <span className="flex flex-col items-center h-full w-full justify-center px-4 text-xl">
               +
             </span>
           )}
-          {image2 && (
+          {cover2 && (
             <Image
               className="rounded object-cover h-12 w-12"
               height={48}
               width={48}
-              src={image2.url}
-              alt={image2.id}
+              src={cover2.url}
+              alt={cover2.id}
             />
           )}
         </div>
