@@ -46,8 +46,11 @@ export function Selector() {
       onClick={toggleSelect}
       variant="outline"
       size="lg"
+      // asChild
     >
+      {/* <Link shallow href={isSelecting ? "/" : "/?select=true"}> */}
       {isSelecting ? "Cancel" : "Select"}
+      {/* </Link> */}
     </Button>
   );
 }
