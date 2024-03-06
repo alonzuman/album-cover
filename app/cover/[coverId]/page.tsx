@@ -2,6 +2,7 @@ import { getCover } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { revalidatePath } from "next/cache";
 import Image from "next/image";
+import Link from "next/link";
 import React, { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
@@ -49,11 +50,44 @@ async function Cover(props: { coverId: string }) {
   }
 
   return (
-    <div>
+    <div className="w-full flex flex-col gap-2">
       {cover?.url && (
-        <Image className='rounded-md' src={cover?.url} width={1024} height={1024} alt={cover?.id} />
+        <Image
+          className="rounded-md"
+          src={cover?.url}
+          width={1024}
+          height={1024}
+          alt={cover?.id}
+        />
       )}
-      <pre>{JSON.stringify(cover, null, 2)}</pre>
+      {cover?.parentCovers && cover?.parentCovers?.length > 0 && (
+        <>
+          <h2 className="">Created from:</h2>
+          <div className="flex gap-2">
+            <Link href={`/cover/${cover?.parentCovers?.[0]?.id}`}>
+              <Image
+                key={cover?.parentCovers?.[0]?.id}
+                className="rounded-md h-full w-full aspect-square object-cover"
+                src={cover?.parentCovers?.[0]?.url ?? ""}
+                width={100}
+                height={100}
+                alt={cover?.parentCovers?.[0]?.prompt ?? ""}
+              />
+            </Link>
+            <div className="flex h-full flex-col p-4">+</div>
+            <Link href={`/cover/${cover?.parentCovers?.[1]?.id}`}>
+              <Image
+                key={cover?.parentCovers?.[1]?.id}
+                className="rounded-md h-full w-full aspect-square object-cover"
+                src={cover?.parentCovers?.[1]?.url ?? ""}
+                width={100}
+                height={100}
+                alt={cover?.parentCovers?.[1]?.prompt ?? ""}
+              />
+            </Link>
+          </div>
+        </>
+      )}
     </div>
   );
 }
