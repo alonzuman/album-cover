@@ -21,6 +21,9 @@ model Cover {
   // Self relations to parent/child covers
   parentCovers Cover[] @relation("CoverToCover")
   childCovers  Cover[] @relation("CoverToCover")
+
+  // Prompt is auto generated
+  prompt String? @db.Text
 }
 
 enum CoverStatus {

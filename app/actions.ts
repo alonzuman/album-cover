@@ -13,7 +13,7 @@ const coverInclude = {
 };
 
 export async function createCover(formData: FormData) {
-  console.log("[createCover]");
+  console.log("[createCover]", Date.now());
   const cover1Id = formData.get("cover1") as string;
   const cover2Id = formData.get("cover2") as string;
 
@@ -29,8 +29,8 @@ export async function createCover(formData: FormData) {
 
   // Create the prompt by mixing the descriptions of both images
   const generatedPrompt = await generatePrompt({
-    image1: image1Url,
-    image2: image2Url,
+    cover1,
+    cover2,
   });
 
   // Run the model with both images
@@ -44,6 +44,7 @@ export async function createCover(formData: FormData) {
   const cover = await db.cover.create({
     data: {
       id: generation.id,
+      prompt: generatedPrompt,
       status: "processing",
       parentCovers: {
         connect: [
@@ -63,7 +64,7 @@ export async function createCover(formData: FormData) {
 }
 
 export async function getCover(id: string) {
-  console.log("[getCover]", id);
+  console.log("[getCover]", id, Date.now());
   let cover = await db.cover.findUnique({
     where: {
       id,
@@ -111,7 +112,7 @@ export async function getCover(id: string) {
 
   // TODO handle error cases better
   if (generation.status === "failed" || generation.status === "error") {
-    console.error(generation.error);
+    console.error(generation.error, Date.now());
     cover = await db.cover.update({
       where: {
         id,
@@ -127,23 +128,31 @@ export async function getCover(id: string) {
   return cover;
 }
 
-async function generatePrompt(args: { image1: string; image2: string }) {
-  console.log("[generatePrompt]", args);
+async function generatePrompt(args: {
+  cover1: { prompt: string; url: string };
+  cover2: { prompt: string; url: string };
+}) {
+  console.log("[generatePrompt]", args, Date.now());
   const [image1Caption, image2Caption] = await Promise.all([
-    createImageCaption({ image: args.image1 }),
-    createImageCaption({ image: args.image2 }),
+    args.cover1.prompt
+      ? { caption: args.cover1.prompt }
+      : createImageCaption({ image: args.cover1.url }),
+    args.cover2.prompt
+      ? { caption: args.cover2.prompt }
+      : createImageCaption({ image: args.cover1.url }),
   ]);
 
   return `An album cover of a mix between ${image1Caption.caption} and a ${image2Caption.caption}`;
 }
 
 export async function listCovers() {
-  console.log("[listCovers]");
+  console.log("[listCovers]", Date.now());
   const covers = await db.cover.findMany({
     where: {
-      status: {
-        in: ["published"],
-      },
+      status: "published",
+    },
+    orderBy: {
+      createdAt: "desc",
     },
   });
   return covers;

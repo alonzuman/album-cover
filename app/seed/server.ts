@@ -5,45 +5,7 @@ import { createBlobUrl } from "@/lib/utils";
 import { del, list, put } from "@vercel/blob";
 import fs from "fs";
 import { getId } from "@/lib/utils";
-
-const ALBUMS = [
-  {
-    id: getId(),
-    name: "Abbey Road",
-    artist: "The Beatles",
-    url: "/covers/1.webp",
-  },
-  {
-    id: getId(),
-    name: "Horses/Horses",
-    artist: "Patti Smith",
-    url: "/covers/2.webp",
-  },
-  {
-    id: getId(),
-    name: "Ready to Die",
-    artist: "The Notorious B.I.G.",
-    url: "/covers/3.webp",
-  },
-  {
-    id: getId(),
-    name: "Led Zeppelin",
-    artist: "Led Zeppelin",
-    url: "/covers/4.webp",
-  },
-  {
-    id: getId(),
-    name: "Nevermind",
-    artist: "Nirvana",
-    url: "/covers/5.webp",
-  },
-  {
-    id: getId(),
-    name: "To Pimp a Butterfly",
-    artist: "Kendrick Lamar",
-    url: "/covers/6.webp",
-  },
-];
+import { createImageCaption } from "@/lib/replicate";
 
 export async function seed() {
   console.log("[seed]", "🌱");
@@ -62,28 +24,38 @@ export async function seed() {
   );
   console.log("Deleted blobs");
 
-  const seedPromises = ALBUMS.map(async (album) => {
-    console.log("Seeding album", album.id);
-    const albumUrlPath = process.cwd() + "/public" + album.url;
-    const buffer = fs.readFileSync(albumUrlPath);
-
-    const blobUrl = createBlobUrl({ folder: "covers", id: album.id });
-
-    const putRes = await put(blobUrl, buffer, {
-      contentType: "image/webp",
-      access: "public",
-    });
-
-    await db.cover.create({
-      data: {
-        id: album.id,
-        url: putRes.url,
-        // Note that we are publishing the album covers as they are already
-        // approved by us
-        status: "published",
-      },
-    });
+  // Read dir public/covers
+  const coversPaths = fs.readdirSync(process.cwd() + "/public/covers");
+  // Get the album buffer in an array
+  const coverBuffers = coversPaths.map((coverPath) => {
+    return fs.readFileSync(process.cwd() + "/public/covers/" + coverPath);
   });
 
-  await Promise.all(seedPromises);
+  await Promise.all(
+    coverBuffers.map(async (cover) => {
+      const blobUrl = createBlobUrl({ folder: "covers", id: getId() });
+
+      // Upload the image to the object store
+      const putRes = await put(blobUrl, cover, {
+        contentType: "image/webp",
+        access: "public",
+      });
+
+      // Get the caption
+      const imageCaptionRes = await createImageCaption({ image: putRes.url });
+
+      await db.cover.create({
+        data: {
+          id: getId(),
+          url: putRes.url,
+          prompt: imageCaptionRes.caption,
+          // Note that we are publishing the album covers as they are already
+          // approved by us
+          status: "published",
+        },
+      });
+    })
+  );
+
+  console.log("Seeded!");
 }
