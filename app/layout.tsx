@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import { Toaster } from "@/components/ui/toaster";
 
 import "./globals.css";
+import Link from "next/link";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -20,7 +21,9 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <header className="p-4">
-          <h1 className="font-medium">Coverge</h1>
+          <Link href="/">
+            <h1 className="font-medium">Coverge</h1>
+          </Link>
         </header>
         <main className="max-w-2xl mx-auto p-4">{children}</main>
         <Toaster />

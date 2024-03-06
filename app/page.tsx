@@ -1,5 +1,5 @@
 import React, { Suspense } from "react";
-import { Covers } from "./covers";
+import { CoversList } from "./covers";
 import { listCovers } from "./actions";
 import { Seed } from "./seed/client";
 
@@ -9,13 +9,13 @@ export default async function Page() {
       {/* <Seed /> */}
       <h2 className="font-medium mb-2">Latest</h2>
       <Suspense fallback="Loading...">
-        <CoversList />
+        <Covers />
       </Suspense>
     </>
   );
 }
 
-async function CoversList() {
+async function Covers() {
   const covers = await listCovers();
-  return <Covers data={covers} />;
+  return <CoversList data={covers} />;
 }

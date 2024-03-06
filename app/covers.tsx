@@ -8,7 +8,7 @@ import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/components/ui/use-toast";
 
-export function Covers(props: { data: ListCovers }) {
+export function CoversList(props: { data: ListCovers }) {
   const [selected, setSelected] = React.useState<string[]>([]);
   const { toast } = useToast();
   const covers = props.data;
@@ -56,13 +56,15 @@ export function Covers(props: { data: ListCovers }) {
                 isSelected ? "scale-95" : "scale-100"
               )}
             >
-              <Image
-                height={512}
-                width={512}
-                src={album.url}
-                alt={album.id}
-                className="object-cover h-full w-full rounded-md"
-              />
+              {album.url && (
+                <Image
+                  height={512}
+                  width={512}
+                  src={album.url}
+                  alt={album.id}
+                  className="object-cover h-full w-full rounded-md"
+                />
+              )}
             </button>
           );
         })}
@@ -74,7 +76,7 @@ export function Covers(props: { data: ListCovers }) {
         )}
       >
         <div className="flex gap-2">
-          {cover1 && (
+          {cover1?.url && (
             <Image
               className="rounded object-cover h-12 w-12"
               height={48}
@@ -88,7 +90,7 @@ export function Covers(props: { data: ListCovers }) {
               +
             </span>
           )}
-          {cover2 && (
+          {cover2?.url && (
             <Image
               className="rounded object-cover h-12 w-12"
               height={48}
