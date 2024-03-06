@@ -1,6 +1,6 @@
 "use client";
 import { seed } from "./server";
-import { SubmitButton } from "@/components/submit-button";
+import { SubmitButton } from "@/app/submit-button";
 
 export function Seed() {
   return (

@@ -1,4 +1,4 @@
-import { SubmitButton } from "@/components/submit-button";
+import { SubmitButton } from "@/app/submit-button";
 import { db } from "@/lib/db";
 import { Cover } from "@prisma/client";
 import { revalidatePath } from "next/cache";
