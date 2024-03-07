@@ -64,6 +64,28 @@ export async function createCover(formData: FormData) {
   return cover;
 }
 
+export async function getOrUpsertCover(id: string) {
+  console.log("[getOrUpsertCover]", id, Date.now());
+  const TIMEOUT = 30;
+  let count = 0;
+
+  while (count < TIMEOUT) {
+    const cover = await getCover(id);
+    if (cover?.status === "succeeded" || cover?.status === "published") {
+      return cover;
+    } else if (cover?.status === "error") {
+      console.log("Error generating cover", cover);
+      throw new Error("Error generating cover");
+    }
+
+    // Sleep for 1 sec
+    console.log("Sleeping");
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    count++;
+  }
+}
+
 export async function getCover(id: string) {
   console.log("[getCover]", id, Date.now());
   let cover = await db.cover.findUnique({

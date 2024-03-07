@@ -31,9 +31,13 @@ async function NewCoversList() {
 
   return (
     <>
-      {covers.map((cover) => (
-        <NewCoverListItem key={cover.id} {...cover} />
-      ))}
+      {covers?.length > 0 ? (
+        covers.map((cover) => <NewCoverListItem key={cover.id} {...cover} />)
+      ) : (
+        <>
+          <p>No new covers to approve</p>
+        </>
+      )}
     </>
   );
 }
@@ -43,16 +47,16 @@ function NewCoverListItem({ ...cover }: Cover) {
     <form
       action={async (formData: FormData) => {
         "use server";
-        // console.log("Approve", cover.id);
       }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       {cover.url && <img src={cover.url} alt="cover" className="rounded-md" />}
       <div className="flex gap-4 p-4">
         <SubmitButton
+          variant="destructive"
           formAction={async (formData: FormData) => {
             "use server";
-            console.log("Delete", cover.id);
+            console.log("[unapproveCover]", cover.id);
             await db.cover.update({
               where: {
                 id: cover.id,
@@ -71,7 +75,7 @@ function NewCoverListItem({ ...cover }: Cover) {
         <SubmitButton
           formAction={async (formData: FormData) => {
             "use server";
-            console.log("Approve", cover.id);
+            console.log("[approveCover]", cover.id);
             await db.cover.update({
               where: {
                 id: cover.id,
