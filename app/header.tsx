@@ -6,7 +6,7 @@ import { useSelect } from "./select-provider";
 import { Button } from "@/components/ui/button";
 
 export function Header() {
-  const { selecting, toggleSelect } = useSelect();
+  const { selecting, toggleSelecting } = useSelect();
 
   return (
     <>
@@ -19,7 +19,7 @@ export function Header() {
         {/* <Link href="/">
             <h1 className="text-xl font-medium mb-2">Explore</h1>
           </Link> */}
-        <Button size="lg" variant="outline" onClick={toggleSelect}>
+        <Button size="lg" variant="outline" onClick={toggleSelecting}>
           {selecting ? "Cancel" : "Select"}
         </Button>
       </header>

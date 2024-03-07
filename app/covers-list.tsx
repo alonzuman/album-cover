@@ -11,7 +11,7 @@ import Link from "next/link";
 import { useSelect } from "./select-provider";
 
 export function CoversList(props: { data: ListCovers }) {
-  const { selecting, toggleSelect } = useSelect();
+  const { selecting, toggleSelecting } = useSelect();
   const [selected, setSelected] = React.useState<string[]>([]);
   const { toast } = useToast();
   const covers = props.data;
@@ -25,7 +25,7 @@ export function CoversList(props: { data: ListCovers }) {
     <form
       action={async (formData) => {
         const res = await createCover(formData);
-        toggleSelect();
+        toggleSelecting();
         push(`/cover/${res.id}`);
       }}
     >

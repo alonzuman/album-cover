@@ -1,32 +1,11 @@
-"use client";
-import { createContext, useContext, useState } from "react";
+import { create } from "zustand";
 
-function useSelectInner() {
-  const [selecting, setSelecting] = useState(false);
+type Store = {
+  selecting: boolean;
+  toggleSelecting: () => void;
+};
 
-  return {
-    selecting,
-    toggleSelect() {
-      setSelecting((prev) => !prev);
-    },
-  };
-}
-
-type UseSelectInner = ReturnType<typeof useSelectInner>;
-
-const selectContext = createContext<UseSelectInner | null>(null);
-
-export function useSelect() {
-  const context = useContext(selectContext);
-  if (!context) {
-    throw new Error("useSelect must be used within a SelectProvider");
-  }
-  return context;
-}
-
-export function SelectProvider({ children }: { children: React.ReactNode }) {
-  const value = useSelectInner();
-  return (
-    <selectContext.Provider value={value}>{children}</selectContext.Provider>
-  );
-}
+export const useSelect = create<Store>()((set) => ({
+  selecting: false,
+  toggleSelecting: () => set((state) => ({ selecting: !state.selecting })),
+}));
