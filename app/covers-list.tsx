@@ -77,7 +77,7 @@ export function CoversList(props: { data: ListCovers }) {
               )}
             </button>
           ) : (
-            <Link href={`/cover/${album.id}`}>
+            <Link key={album.id} href={`/cover/${album.id}`}>
               {album.url && (
                 <Image
                   height={512}
